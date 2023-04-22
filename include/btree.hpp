@@ -8,13 +8,16 @@ class BTree
 {
 private:
     Node* root;
+    int32_t order;
+    int32_t num_nodes;
 public:
-    BTree();
+    BTree(int32_t order);
     ~BTree();
-    int32_t insert(int32_t value);
-    int32_t remove(int32_t value);
-    int32_t search(int32_t value);
-    int32_t range_search(int32_t start, int32_t end);
+    void insert(pop_frame value);
+    bool remove(int32_t value);
+    void print();
+    pop_frame search(int32_t value);
+    range_search_frame range_search(int32_t start, int32_t end);
 };
 
 # endif
