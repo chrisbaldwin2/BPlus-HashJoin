@@ -58,6 +58,21 @@ struct range_search_frame {
     ~range_search_frame(){
         results.clear();
     }
+
+    void print(){
+        if(results.size() == 0){
+            std::cout << "No results found" << std::endl;
+            return;
+        }
+        if(results.size() <= 3) {
+            for(auto result : results){
+                std::cout << result.value << " ";
+            }
+            std::cout << std::endl;
+            return;
+        }
+        std::cout << results[0].value << " " << results[1].value << " ... " << results[results.size()-2].value << " " << results[results.size()-1].value << std::endl;
+    }
 };
 
 /**

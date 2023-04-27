@@ -72,5 +72,10 @@ bool BTree::exists(int32_t value){
 range_search_frame BTree::range_search(int32_t start, int32_t end){
     if(this->print_flag)
         std::cout << "Searching for range " << start << " to " << end << std::endl;
+    auto result = this->root->range_search(start, end);
+    if(this->print_flag) {
+        std::cout << "Range search result " << std::endl;
+        result.print();
+    }
     return this->root->range_search(start, end);
 }

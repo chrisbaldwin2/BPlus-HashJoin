@@ -20,7 +20,11 @@ int VMem::get_max_blocks() {
 }
 
 void VMem::insert_block(std::string key, block b) {
-    if (data.size() >= max_blocks) {
+    if (data.size() >= max_blocks && !block_exists(key)) {
+        std::cout << "VMem is full" << std::endl;
+        print();
+        std::cout << "Inserting " << key << std::endl;
+        b.print();
         throw std::runtime_error("VMem is full");
     }
     data.insert_or_assign(key, b);

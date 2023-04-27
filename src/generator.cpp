@@ -138,6 +138,8 @@ void TupleGenerator::print(){
  * Generate a relation R(A,B) with 1,000 tuples, where B is a random key from S and A is a random.
 */
 void TupleGenerator::generate(int32_t r1_tuples, int32_t r2_tuples, bool use_r1_keys){
+    this->r1_tuples.clear();
+    this->r2_tuples.clear();
     std::set<tuple> tuples;
     std::random_device rd;
     std::mt19937 gen(rd());

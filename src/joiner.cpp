@@ -14,8 +14,11 @@ Joiner::~Joiner(){
 
 }
 
+/**
+ * Want to have the number of buckets be the square root of the number of blocks
+*/
 int Joiner::num_buckets(int num_tuples){
-    return std::ceil(num_tuples / (vmem->get_max_blocks() * TUPLES_PER_BLOCK * 2));
+    return std::ceil(std::sqrt(num_tuples));
 }
 
 std::string Joiner::get_bucket_name(std::string relation, int bucket_num){
@@ -206,8 +209,8 @@ void Joiner::write_relations_to_disk(std::string relation1, std::vector<tuple>* 
 }
 
 void Joiner::join(std::string relation1, std::string relation2, std::string output){
-    int num_blocks = std::max(vdisk->get_relation_size(relation1), vdisk->get_relation_size(relation2));
-    buckets = num_buckets(num_blocks * TUPLES_PER_BLOCK);
+    int num_blocks = std::min(vdisk->get_relation_size(relation1), vdisk->get_relation_size(relation2));
+    buckets = num_buckets(num_blocks);
     std::cout << "Num buckets: " << buckets << std::endl;
     hash_to_buckets(relation1, buckets);
     hash_to_buckets(relation2, buckets);
