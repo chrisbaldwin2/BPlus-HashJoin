@@ -49,10 +49,12 @@ private:
     std::string r1_name;
     std::string r2_name;
     std::string output_name;
+    bool print_flag;
 
     void clean_joiner();
     void build_joiner();
     void write_tuples_to_disk();
+    void set_print_flag(bool print_flag);
     void print();
 public:
     HashTest();

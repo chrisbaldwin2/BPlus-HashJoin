@@ -39,7 +39,7 @@ void VMem::append_to_disk(VDisk* vdisk, std::string key) {
     // Check if key exists in vdisk
     // vdisk->print();
     if (!vdisk->relation_exists(key)) {
-        std::cout << "Writing new relation " << key << std::endl;
+        // std::cout << "Writing new relation " << key << std::endl;
         vdisk->write_block(key, 0, data.at(key));
         return;
     }

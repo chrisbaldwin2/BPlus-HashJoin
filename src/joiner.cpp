@@ -66,6 +66,10 @@ void Joiner::merge_all_buckets(std::string relation1, std::string relation2, std
 
 }
 
+void Joiner::set_print_flag(bool flag){
+    print_flag = flag;
+}
+
 void Joiner::merge_buckets(std::string relation1, std::string relation2, std::string output, int bucket_num){
     if(vmem->get_num_blocks() > 1){
         vmem->print();
@@ -83,8 +87,10 @@ void Joiner::merge_buckets(std::string relation1, std::string relation2, std::st
 
     std::vector<block> bucket1_blocks = vdisk->read_block_schedule(bucket1_name, 0);
     std::vector<block> bucket2_blocks = vdisk->read_block_schedule(bucket2_name, 0);
-    std::cout << "Bucket 1 blocks: " << bucket1_blocks.size() << std::endl;
-    std::cout << "Bucket 2 blocks: " << bucket2_blocks.size() << std::endl;
+    if(print_flag) {
+        std::cout << "Bucket 1 blocks: " << bucket1_blocks.size() << std::endl;
+        std::cout << "Bucket 2 blocks: " << bucket2_blocks.size() << std::endl;
+    }
     // vmem->print();
     std::vector<block>* mem_blocks;
     std::vector<block>* disk_blocks;
@@ -107,7 +113,8 @@ void Joiner::merge_buckets(std::string relation1, std::string relation2, std::st
     for(int i = 0; i < mem_blocks->size(); i++){
         vmem->insert_block(get_block_name(smaller_bucket_name, bucket_num, i), mem_blocks->at(i));
     }
-    vmem->print();
+    if(print_flag)
+        vmem->print();
     block output_block = vmem->get_block(output);
     // Merge blocks
     std::vector<tuple> r1_tuples = {};
@@ -118,7 +125,11 @@ void Joiner::merge_buckets(std::string relation1, std::string relation2, std::st
         }
     }
     std::vector<tuple> new_tuples;
-    for(auto b : *disk_blocks){
+    for(int i = 0; i < disk_blocks->size(); i++){
+        block b = disk_blocks->at(i);
+        if(print_flag){
+            std::cout << larger_bucket_name << "_bucket" << bucket_num << "_" << i << ":" << std::endl; b.print();
+        }
         for(auto tuple : b.tuples){
             r2_tuples.push_back(tuple);
         }

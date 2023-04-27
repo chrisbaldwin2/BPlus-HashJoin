@@ -6,27 +6,29 @@
 int node_enumerator = 0;
 
 Node::Node(int32_t order){
-    std::cout<<"Node constructor called"<<std::endl;
+    // std::cout<<"Node constructor called"<<std::endl;
     children.clear();
     values.clear();
     this->order = order;
     leaf = false;
     root = false;
     this->node_id = node_enumerator++;
+    print_flag = false;
 }
 
 Node::Node(int32_t order, bool leaf, bool root){
-    std::cout<<"Node constructor called"<<std::endl;
+    // std::cout<<"Node constructor called"<<std::endl;
     children.clear();
     values.clear();
     this->order = order;
     this->leaf = leaf;
     this->root = root;
     this->node_id = node_enumerator++;
+    print_flag = false;
 }
 
 Node::Node(int32_t order, bool leaf, bool root, std::vector<pop_frame> tuples){
-    std::cout<<"Node constructor called"<<std::endl;
+    // std::cout<<"Node constructor called"<<std::endl;
     assert((tuples.size() <= order+!leaf) && tuples.size() > 0);
     children.clear();
     values.clear();
@@ -40,15 +42,26 @@ Node::Node(int32_t order, bool leaf, bool root, std::vector<pop_frame> tuples){
             values.push_back(tuple.value);
     }
     this->node_id = node_enumerator++;
+    print_flag = false;
 }
 
 Node::~Node(){
-    std::cout<<"Node destructor called"<<std::endl;
+    // std::cout<<"Node destructor called"<<std::endl;
     if(is_leaf())
         return;
     for(auto child : children){
         if(child != EMPTY_PTR)
             delete child;
+    }
+}
+
+void Node::set_print_flag(bool flag){
+    print_flag = flag;
+    if(!is_leaf()){
+        for(auto child : children){
+            if(child != EMPTY_PTR)
+                child->set_print_flag(flag);
+        }
     }
 }
 
@@ -77,8 +90,27 @@ bool Node::empty(){
     return children.size() == 0;
 }
 
-bool Node::underflow(){
-    return empty(); // Placeholder
+bool Node::underflow(int index){
+    assert(!is_leaf()); // The node must be a branch node
+    // Check if the child at index is underflowing with adjacent siblings
+    if(!children[index]->is_leaf() && index > 0){
+        if(children[index-1]->get_num_children() + children[index]->get_num_children() <= order+1){
+            return true;
+        }
+    } else if (!children[index]->is_leaf()) {
+        if(children[index]->get_num_children() + children[index+1]->get_num_children() <= order+1){
+            return true;
+        }
+    } else if (index > 0) {
+        if(children[index-1]->get_num_values() + children[index]->get_num_values() <= order){
+            return true;
+        }
+    } else {
+        if(children[index]->get_num_values() + children[index+1]->get_num_values() <= order){
+            return true;
+        }
+    }
+    return false; 
 }
 
 bool Node::overflow(){
@@ -115,7 +147,7 @@ int32_t Node::contains(int32_t value){
             return i;
         }
     }
-    std::cout << "Value " << value << " not found" << std::endl;
+    // std::cout << "Value " << value << " not found" << std::endl;
     return INT_BAD;
 }
 
@@ -123,23 +155,26 @@ int32_t Node::search_child_index(int32_t value){
     assert(!is_leaf()); // The node must be a branch node
     assert(!overflow()); // The node must not be over full
     int32_t i = 0;
-    std::cout << "Searching for " << value << std::endl;
+    // std::cout << "Searching for " << value << std::endl;
     while (i < values.size() && values[i] < value) {
         i++;
     }
-    std::cout << "Value size " << values.size() << std::endl;
-    std::cout << "Children size " << children.size() << std::endl;
+    // std::cout << "Value size " << values.size() << std::endl;
+    // std::cout << "Children size " << children.size() << std::endl;
     assert(i >= 0 && i < children.size());
     if(i == values.size()){
-        std::cout << "Value is bigger than all values; returning " << i << std::endl;
+        // std::cout << "Value is bigger than all values; returning " << i << std::endl;
         return i;
     }
-    std::cout << "Value " << value << " is smaller than " << values[i] << "; returning " << i << std::endl;
+    // std::cout << "Value " << value << " is smaller than " << values[i] << "; returning " << i << std::endl;
     return i;
 }
 
 void Node::add_value(int32_t value){
-    assert(!full()); // The node must not be full
+    if(print_flag) {
+        std::cout << "Adding value " << value << " to node " << to_string() << std::endl;
+    }
+    assert(!full());
     assert(is_leaf()); // The node must be a leaf node
     int32_t i = 0;
     // Insert the new value in the correct position
@@ -176,6 +211,11 @@ int32_t Node::get_min_value(){
     }
 }
 
+void Node::set_next(Node* next){
+    assert(is_leaf());
+    this->next = next;
+}
+
 void Node::print(){
     if(is_root()){
         std::cout<<"Root " << node_id << ": ";
@@ -203,6 +243,33 @@ void Node::print(){
         }
     }
     std::cout<<std::endl;
+    std::cout.flush();
+}
+
+void Node::print_current(){
+    if(is_root()){
+        std::cout<<"Root " << node_id << ": ";
+    } else if(is_leaf()){
+        std::cout<<"Leaf " << node_id << ": ";
+        for (auto value : values) {
+            std::cout<<value<<" ";
+        }
+        std::cout<<std::endl;
+    }
+    else{
+        std::cout<<"Branch " << node_id << ": ";
+    }
+    if(!is_leaf()){
+        // Print the children and values
+        for (int32_t i = 0; i < children.size(); i++) {
+            std::cout << children[i]->to_string() << " ";
+            if(i < values.size()){
+                std::cout<<values[i]<<" ";
+            }
+        }
+        std::cout << std::endl;
+    }
+
 }
 
 void Node::move_value(int32_t index, Node* dest){
@@ -221,7 +288,11 @@ void Node::move_value(int32_t index, Node* dest){
 */
 pop_frame Node::leaf_split(int32_t value){
     assert(full());
-    std::cout << "Splitting leaf node" << std::endl;
+    if(print_flag){
+        std::cout << "Splitting leaf node " << to_string() << std::endl;
+        std::cout << "Before split: " << to_string() << std::endl;
+        print_current();
+    }
     // std::cout << "Order is " << order << std::endl;
     // std::cout << "Pushing indexes " << order/2 << " to " << values.size() - 1 << std::endl;
     // Create a vector for the values
@@ -240,13 +311,23 @@ pop_frame Node::leaf_split(int32_t value){
     // Update the next node pointers for the new node and the current node
     new_node->next = next;
     next = new_node;
+    if(print_flag){
+        std::cout << "After split: " << to_string() << std::endl;
+        print_current();
+        std::cout << "New node: " << new_node->to_string() << std::endl;
+        new_node->print_current();
+    }
     return pop_frame(new_node, new_node->get_min_value());
 }
 
 pop_frame Node::branch_split(pop_frame new_tuple){
     assert(values.size() == order);
     assert(children.size() == order+1);
-    std::cout << "Splitting branch node" << std::endl;
+    if(print_flag){
+        std::cout << "Splitting branch node " << to_string() << std::endl;
+        std::cout << "Before split: " << std::endl;
+        print_current();
+    }
     // Create a vector for the values
     std::vector<pop_frame> tuples;
     // Insert the new tuple
@@ -264,6 +345,12 @@ pop_frame Node::branch_split(pop_frame new_tuple){
     tuples[0].value = EMPTY_INT;
     // Create a new node
     Node* new_node = new Node(order, false, false, tuples);
+    if(print_flag){
+        std::cout << "After split: " << to_string() << std::endl;
+        print_current();
+        std::cout << "New node: " << new_node->to_string() << std::endl;
+        new_node->print_current();
+    }
     // Return the new node
     return pop_frame(new_node, pop_value);
 }
@@ -278,16 +365,20 @@ pop_frame Node::search(int32_t value){
     int32_t i = contains(value);
     // Leaf node does not have children
     if (i != INT_BAD) {
+        if(print_flag)
+            std::cout << "Found value " << value << " in node " << to_string() << std::endl;
         return pop_frame(EMPTY_PTR, values[i]);
     }
     // Result not found
+    if(print_flag)
+        std::cout << "Value " << value << " not found in " << to_string() << std::endl;
     return pop_frame();
 }
 
 std::vector<pop_frame> Node::get_range(int32_t end){
     assert(is_leaf()); // Range search is only supported in leaf nodes
     std::vector<pop_frame> results;
-    print();
+    // print();
     // The range is in the current node
     int32_t i = 0;
     for(; i < values.size(); i++){
@@ -311,7 +402,7 @@ range_search_frame Node::leaf_range_search(int32_t start, int32_t end){
     assert(is_leaf()); // Range search is only supported in leaf nodes
     // The range is in the current node
     range_search_frame result_frame;
-    print();
+    // print();
     int32_t i = 0;
     for(; i < values.size(); i++){
         // Get the first value in the range
@@ -349,32 +440,48 @@ range_search_frame Node::range_search(int32_t start, int32_t end){
     return leaf_range_search(start, end);
 }
 
+void Node::add_child(pop_frame new_tuple){
+    assert(!is_leaf()); // Branch insert is only supported in branch nodes// Add the new node to the current node
+    int32_t insert_index = search_child_index(new_tuple.value);
+    // Check if the new node is the smallest value
+    if(insert_index == 0){
+        values.insert(values.begin(), children[0]->get_min_value());
+        children.insert(children.begin(), new_tuple.node);
+        return;
+    }
+    // If new node is not the smallest value, insert the value and node
+    values.insert(values.begin()+insert_index, new_tuple.value);
+    children.insert(children.begin()+insert_index+1, new_tuple.node);
+}
+
 pop_frame Node::branch_insert(pop_frame new_tuple){
     assert(!is_leaf()); // Branch insert is only supported in branch nodes
     // Search the correct child
     int32_t i = search_child_index(new_tuple.value);
-    std::cout << "Inserting into child " << i << std::endl;
+    // std::cout << "Inserting into child " << i << std::endl;
     pop_frame result = children[i]->insert(new_tuple);
     // Check if the child node was split
     if(result.node != EMPTY_PTR){
-        std::cout << "Child node was split" << std::endl;
+        if(print_flag)
+            std::cout << "Child node was split " << children[i]->to_string() << std::endl;
         // Check if the current node is full
         if(full()){
-            std::cout << "Current node is full" << std::endl;
+            if(print_flag)
+                std::cout << "Current branch node is full " << to_string() << std::endl;
             // Split the current node
             return branch_split(result);
         }
-        // Add the new node to the current node
-        int32_t insert_index = search_child_index(result.value);
-        // Check if the new node is the smallest value
-        if(insert_index == 0){
-            values.insert(values.begin(), children[0]->get_min_value());
-            children.insert(children.begin(), result.node);
-            return pop_frame();
+        if(print_flag){
+            std::cout << "Branch Inserting " << result.node->to_string() << " into " << to_string() << std::endl;
+            std::cout << "Before insert: " << to_string() << std::endl;
+            print_current();
         }
-        // If new node is not the smallest value, insert the value and node
-        values.insert(values.begin()+insert_index, result.value);
-        children.insert(children.begin()+insert_index+1, result.node);
+        // Add the new node to the current node
+        add_child(result);
+        if(print_flag){
+            std::cout << "After insert: " << to_string() << std::endl;
+            print_current();
+        }
     }
     return pop_frame();
 
@@ -385,17 +492,28 @@ pop_frame Node::leaf_insert(pop_frame new_tuple){
     // Check if the value is already in the node
     int32_t i = contains(new_tuple.value);
     if(i != INT_BAD){
-        std::cout << "Value already exists in the tree" << std::endl;
+        if(print_flag)
+            std::cout << "Value already exists in node " << to_string() << std::endl;
         return pop_frame();
     }
     // Check if the current node is full
     if(full()){
-        std::cout << "Current node is full" << std::endl;
+        if(print_flag)
+            std::cout << "Current leaf node is full " << to_string() << std::endl;
         // Split the current node
         return leaf_split(new_tuple.value);
     }
+    if(print_flag){
+        std::cout << "Leaf Inserting " << new_tuple.value << " into " << to_string() << std::endl;
+        std::cout << "Before insert: " << to_string() << std::endl;
+        print_current();
+    }
     // Add the new tuple to the current node
     add_value(new_tuple.value);
+    if(print_flag){
+        std::cout << "After insert: " << to_string() << std::endl;
+        print_current();
+    }
     return pop_frame();
 }
 
@@ -409,13 +527,49 @@ pop_frame Node::insert(pop_frame new_tuple){
     return leaf_insert(new_tuple);
 }
 
-// Assume that the current node and the new node
+// Always merge from right to left
 pop_frame Node::branch_merge(pop_frame new_tuple){
-    return pop_frame();
+    assert(!is_leaf()); // Branch merge is only supported in branch nodes
+    if(print_flag){
+        std::cout << "Branch merging " << to_string() << " with " << new_tuple.node->to_string() << std::endl;
+        std::cout << "Before merge: " << to_string() << std::endl;
+        print_current();
+        new_tuple.node->print_current();
+    }
+    // Push the values to the other node
+    for(int32_t i = 0; i < children.size(); i++){
+        if(i == 0){
+            new_tuple.node->add_child(pop_frame(children[i], children[i]->get_min_value()));
+            continue;
+        }
+        new_tuple.node->add_child(pop_frame(children[i], values[i-1]));
+    }
+    if(print_flag){
+        std::cout << "After merging " << to_string() << " with " << new_tuple.node->to_string() << std::endl;
+        new_tuple.node->print_current();
+    }
+    return new_tuple;
 }
 
 pop_frame Node::leaf_merge(pop_frame new_tuple){
-    return pop_frame();
+    assert(is_leaf()); // Leaf merge is only supported in leaf nodes
+    if(print_flag){
+        std::cout << "Leaf merging " << to_string() << " with " << new_tuple.node->to_string() << std::endl;
+        std::cout << "Before merge: " << to_string() << std::endl;
+        print_current();
+        new_tuple.node->print_current();
+    }
+    // Push the values to the other node
+    for(int32_t i = 0; i < values.size(); i++){
+        new_tuple.node->add_value(values[i]);
+    }
+    // Set the next pointer
+    new_tuple.node->set_next(next);
+    if(print_flag){
+        std::cout << "After merging " << to_string() << " with " << new_tuple.node->to_string() << std::endl;
+        new_tuple.node->print_current();
+    }
+    return new_tuple;
 }
 
 pop_frame Node::merge(pop_frame new_tuple){
@@ -430,27 +584,30 @@ pop_frame Node::branch_remove(int32_t value){
     // Search the correct child
     int32_t i = search_child_index(value);
     pop_frame result = children[i]->remove(value);
-    // Check if the child node was merged
-    if(result.node != EMPTY_PTR){
+    // Check if the child node needs to be merged
+    if(underflow(i)){
         // Merge index i with neighbor
         if(i == 0){
             // Merge with the right neighbor
-            result = children[i]->merge(pop_frame(children[i+1], EMPTY_INT));
-            children.erase(children.begin() + i);
-            values.erase(values.begin() + i);
+            result = children[i+1]->merge(pop_frame(children[i], EMPTY_INT));
+            children.erase(children.begin() + i+1);
+            values.erase(values.begin() + i+1);
             values[i] = children[i]->get_min_value();
         } else {
             // Merge with the left neighbor
-            result = children[i - 1]->merge(result);
+            result = children[i]->merge(pop_frame(children[i - 1], EMPTY_INT));
             children.erase(children.begin() + i);
             values.erase(values.begin() + i);
         }
-        // Check if the current node is underfull
-        if(underflow()){
-            // Merge the current node
-            return pop_frame(this, result.value);
+    } else {
+        if(result.value != EMPTY_INT){
+            values[i] = result.value;
         }
     }
+    if(i == 0 && result.value != EMPTY_INT){
+        return pop_frame(EMPTY_PTR, get_min_value());
+    }
+    
     return pop_frame();
 }
 
@@ -459,15 +616,21 @@ pop_frame Node::leaf_remove(int32_t value){
     // Check if the value is in the node
     int32_t i = contains(value);
     if(i == INT_BAD){
+        if(print_flag)
+            std::cout << "Value does not exist in node " << to_string() << std::endl;
         return pop_frame();
+    }
+    if(print_flag){
+        std::cout << "Removing value " << value << " from node " << to_string() << std::endl;
+        std::cout << "Before remove: " << to_string() << std::endl;
+        print_current();
     }
     // Remove the tuple from the current node
     pop_frame result = pop_frame(EMPTY_PTR, values[i]);
     values.erase(values.begin() + i);
-    // Check if the current node is underfull
-    if(underflow()){
-        // Merge the current node
-        return pop_frame(this, result.value);
+    if(print_flag){
+        std::cout << "After remove: " << to_string() << std::endl;
+        print_current();
     }
     return result;
 }

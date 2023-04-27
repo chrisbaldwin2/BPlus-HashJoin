@@ -27,6 +27,7 @@ struct pop_frame {
     }
 };
 
+// Unused
 struct split_frame {
     pop_frame left;
     pop_frame right;
@@ -88,11 +89,13 @@ private:
     Node* next;
     bool leaf;
     bool root;
+    bool print_flag;
 public:
     Node(int32_t order);
     Node(int32_t order, bool leaf, bool root);
     Node(int32_t order, bool leaf, bool root, std::vector<pop_frame> tuples);
     ~Node();
+    void set_print_flag(bool flag);
     std::string to_string();
     pop_frame search(int32_t value);
     range_search_frame range_search(int32_t start, int32_t end);
@@ -101,23 +104,26 @@ public:
     pop_frame merge(pop_frame new_tuple);
     bool full();
     bool empty();
-    bool underflow();
     bool overflow();
     bool is_leaf();
     bool is_root();
     void set_root(bool root);
     void set_leaf(bool leaf);
+    void set_next(Node* next);
     int32_t get_order();
     int32_t get_num_children();
     int32_t get_num_values();
     int32_t get_min_value();
     void print();
+    void print_current();
     // Branch node functions
+    bool underflow(int index);
     int32_t search_child_index(int32_t value);
     pop_frame branch_split(pop_frame new_tuple);
     pop_frame branch_merge(pop_frame new_tuple);
     pop_frame branch_remove(int32_t value);
     pop_frame branch_insert(pop_frame new_tuple);
+    void add_child(pop_frame new_tuple);
     // Leaf node functions
     int32_t contains(int32_t value);
     void add_value(int32_t value);

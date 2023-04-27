@@ -160,21 +160,21 @@ void BTreeTest::build_dense_tree(){
         this->btree->insert(values->at(i)); 
         i++;
     }
-    this->btree->print();
+    // this->btree->print();
     delete values;
 }
 
 void BTreeTest::build_sparse_tree(){
     // Build a sparse tree
     this->btree = new BTree(order);
-    std::cout << "Getting sequential nodes" << std::endl;
+    // std::cout << "Getting sequential nodes" << std::endl;
     std::vector<int32_t>* values = this->generator->get_nodes();
-    std::cout << "Iterating nodes nodes" << std::endl;
+    // std::cout << "Iterating nodes nodes" << std::endl;
     for(std::vector<int32_t>::iterator it = values->begin(); it != values->end(); it++){
-        std::cout << "Inserting: " << *it << std::endl;
+        // std::cout << "Inserting: " << *it << std::endl;
         this->btree->insert(*it);
     }
-    this->btree->print();
+    // this->btree->print();
     std::cout << "Done building sparse tree" << std::endl;
     delete values;
 }
@@ -186,7 +186,7 @@ void BTreeTest::insert_random(int32_t num_values){
     std::vector<int32_t>* values = this->generator->get_outer_nodes(num_values);
     for(std::vector<int32_t>::iterator it = values->begin(); it != values->end(); it++){
         this->btree->insert(*it);
-        std::cout << "Inserted: " << *it << std::endl;
+        // std::cout << "Inserted: " << *it << std::endl;
     }
     delete values;
 }
@@ -240,10 +240,12 @@ bool BTreeTest::test_sparse_tree(){
     generate_nodes(10000);
     // generator->print();
     build_sparse_tree();
-    std::cout << "Inserting random values" << std::endl;
-    insert_random(2);
+    // Set the print flag to true
+    btree->set_print_flag(true);
     std::cout << "Deleting random values" << std::endl;
     delete_random(2);
+    std::cout << "Random insert / delete values" << std::endl;
+    random_random(2);
     std::cout << "Searching random values" << std::endl;
     search_random(5);
     std::cout << "Range searching random values" << std::endl;
@@ -255,10 +257,12 @@ bool BTreeTest::test_sparse_tree(){
 bool BTreeTest::test_dense_tree(){
     generate_nodes(10000);
     build_dense_tree();
+    // Set the print flag to true
+    btree->set_print_flag(true);
     std::cout << "Inserting random values" << std::endl;
     insert_random(2);
-    std::cout << "Deleting random values" << std::endl;
-    delete_random(2);
+    std::cout << "Random insert / delete values" << std::endl;
+    random_random(2);
     std::cout << "Searching random values" << std::endl;
     search_random(5);
     std::cout << "Range searching random values" << std::endl;
@@ -291,7 +295,7 @@ bool BTreeTest::run_2(){
     std::cout << "~~~~~~~~~Running btree2~~~~~~~~~" << std::endl << std::endl;
     // Build order 13 tree
     this->order = 13;
-    std::cout << "Testing order 13 sparse tree" << std::endl;
+    std::cout << "Testing order 13 dense tree" << std::endl;
     test_dense_tree();
     clean_tree();
     return true;
@@ -311,7 +315,7 @@ bool BTreeTest::run_4(){
     std::cout << "~~~~~~~~~Running btree4~~~~~~~~~" << std::endl << std::endl;
     // Build order 24 tree
     this->order = 24;
-    std::cout << "Testing order 24 sparse tree" << std::endl;
+    std::cout << "Testing order 24 dense tree" << std::endl;
     test_dense_tree();
     clean_tree();
     return true;
@@ -366,6 +370,10 @@ void HashTest::write_tuples_to_disk(){
 void HashTest::print(){
     // Print
     joiner->print();
+}
+
+void HashTest::set_print_flag(bool flag){
+    joiner->set_print_flag(flag);
 }
 
 bool HashTest::run_5_1(){

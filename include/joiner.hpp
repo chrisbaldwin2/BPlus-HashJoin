@@ -10,6 +10,7 @@ private:
     VMem* vmem;
     VDisk* vdisk;
     int buckets;
+    bool print_flag;
     int num_buckets(int num_tuples);
     std::string get_bucket_name(std::string relation, int bucket_num);
     std::string get_block_name(std::string relation, int bucket_num, int block_num);
@@ -24,6 +25,7 @@ public:
     ~Joiner();
     void write_relations_to_disk(std::string relation1, std::vector<tuple>* r1_tuples, std::string relation2, std::vector<tuple>* r2_tuples);
     void join(std::string relation1, std::string relation2, std::string output);
+    void set_print_flag(bool flag);
     void print();
     void print(std::string relation);
     void print(std::string relation, std::vector<int> keys);

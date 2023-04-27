@@ -83,8 +83,8 @@ std::vector<int32_t>* Generator::get_outer_nodes(int32_t num_nodes){
             prev = next;
             next = *it;
             distance = next - prev;
-            std::cout << "Prev: " << prev << " Next: " << next << " Distance: " << distance << std::endl;
-            std::cout << "Result size: " << result->size() << std::endl;
+            // std::cout << "Prev: " << prev << " Next: " << next << " Distance: " << distance << std::endl;
+            // std::cout << "Result size: " << result->size() << std::endl;
             it++;
             if(it == nodes.end()){
                 it = nodes.begin();
@@ -94,11 +94,11 @@ std::vector<int32_t>* Generator::get_outer_nodes(int32_t num_nodes){
         // Pick a random node between the two nodes
         int32_t index = (rand() % distance-1) + 1;
         int32_t node = prev + index;
-        std::cout << "Prev: " << prev << " Next: " << next << " New Node: " << node << std::endl;
+        // std::cout << "Prev: " << prev << " Next: " << next << " New Node: " << node << std::endl;
         result->push_back(node);
-        std::cout << "Result size: " << result->size() << std::endl;
+        // std::cout << "Result size: " << result->size() << std::endl;
     }
-    std::cout << "Result size: " << result->size() << " num_nodes " << num_nodes << std::endl;
+    // std::cout << "Result size: " << result->size() << " num_nodes " << num_nodes << std::endl;
     return result;
 };
 
