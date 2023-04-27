@@ -17,8 +17,8 @@ Joiner::~Joiner(){
 /**
  * Want to have the number of buckets be the square root of the number of blocks
 */
-int Joiner::num_buckets(int num_tuples){
-    return std::ceil(std::sqrt(num_tuples));
+int Joiner::num_buckets(int num_blocks){
+    return std::ceil(std::sqrt(num_blocks));
 }
 
 std::string Joiner::get_bucket_name(std::string relation, int bucket_num){

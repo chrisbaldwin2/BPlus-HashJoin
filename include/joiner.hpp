@@ -11,7 +11,7 @@ private:
     VDisk* vdisk;
     int buckets;
     bool print_flag;
-    int num_buckets(int num_tuples);
+    int num_buckets(int num_blocks);
     std::string get_bucket_name(std::string relation, int bucket_num);
     std::string get_block_name(std::string relation, int bucket_num, int block_num);
     void hash_to_buckets(std::string relation, int num_buckets);
