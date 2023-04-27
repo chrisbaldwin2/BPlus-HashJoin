@@ -6,18 +6,19 @@
 
 
 BTree::BTree(int32_t order){
-    this->order = 1;
+    std::cout << "Tree constructor called" << std::endl;
+    this->order = order;
     this->root = new Node(order, true, true);
-    this->num_nodes = 1;
+    this->num_nodes = 0;
 }
 
 BTree::~BTree(){
     delete this->root;
 }
 
-void BTree::insert(pop_frame value){
-    std::cout << "Inserting " << value.value << std::endl;
-    pop_frame result = this->root->insert(value);
+void BTree::insert(int32_t value){
+    std::cout << "Inserting " << value << std::endl;
+    pop_frame result = this->root->insert(pop_frame(EMPTY_PTR, value));
     this->num_nodes++;
     if(result.node != EMPTY_PTR){
         std::cout << "Splitting root" << std::endl;
@@ -25,6 +26,7 @@ void BTree::insert(pop_frame value){
         children.push_back(pop_frame(this->root, EMPTY_INT));
         children.push_back(pop_frame(result.node, result.value));
         Node* new_root = new Node(order, false, true, children);
+        this->root->set_root(false);
         this->root = new_root;
     }
 }
@@ -45,6 +47,11 @@ void BTree::print(){
 pop_frame BTree::search(int32_t value){
     std::cout << "Searching for " << value << std::endl;
     return this->root->search(value);
+}
+
+bool BTree::exists(int32_t value){
+    std::cout << "Checking if " << value << " exists" << std::endl;
+    return this->root->search(value).value == value;
 }
 
 range_search_frame BTree::range_search(int32_t start, int32_t end){

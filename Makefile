@@ -6,7 +6,7 @@ SRC_DIR = src
 INCLUDE_DIR = include
 OBJ_DIR = obj
 BIN_DIR = bin
-EXE = $(BIN_DIR)/main
+EXE = $(BIN_DIR)/main $(BIN_DIR)/hash_5_1 $(BIN_DIR)/hash_5_2
 
 # Get all the source files in src directory
 SOURCE_FILES = $(wildcard $(SRC_DIR)/*.cpp)
