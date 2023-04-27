@@ -76,6 +76,7 @@ range_search_frame BTree::range_search(int32_t start, int32_t end){
     if(this->print_flag) {
         std::cout << "Range search result " << std::endl;
         result.print();
+        std::cout << std::endl;
     }
-    return this->root->range_search(start, end);
+    return result;
 }

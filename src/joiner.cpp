@@ -130,6 +130,8 @@ void Joiner::merge_buckets(std::string relation1, std::string relation2, std::st
     std::vector<tuple> new_tuples;
     for(int i = 0; i < disk_blocks->size(); i++){
         block b = disk_blocks->at(i);
+        // std::cout << "Inserting block " << get_block_name(larger_bucket_name, bucket_num, i) << std::endl;
+        // vmem->insert_block(larger_bucket_name, b);
         if(print_flag){
             std::cout << larger_bucket_name << "_bucket" << bucket_num << "_" << i << ":" << std::endl; b.print();
         }
@@ -155,6 +157,8 @@ void Joiner::merge_buckets(std::string relation1, std::string relation2, std::st
             output_block.add(new_tuples.back());
             new_tuples.pop_back();
         }
+        // std::cout << "Deleting block " << larger_bucket_name << std::endl;
+        // vmem->delete_block(larger_bucket_name);
         r2_tuples.clear();
     }
     // Clean up mem_blocks

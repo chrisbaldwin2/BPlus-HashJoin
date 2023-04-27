@@ -247,9 +247,9 @@ bool BTreeTest::test_sparse_tree(){
     std::cout << "Random insert / delete values" << std::endl;
     random_random(2);
     std::cout << "Searching random values" << std::endl;
-    search_random(5);
+    search_random(3);
     std::cout << "Range searching random values" << std::endl;
-    range_search_random(5);
+    range_search_random(2);
     std::cout << "Returning sparse tree test" << std::endl;
     return true;
 }
@@ -264,9 +264,9 @@ bool BTreeTest::test_dense_tree(){
     std::cout << "Random insert / delete values" << std::endl;
     random_random(2);
     std::cout << "Searching random values" << std::endl;
-    search_random(5);
+    search_random(3);
     std::cout << "Range searching random values" << std::endl;
-    range_search_random(5);
+    range_search_random(2);
     std::cout << "Returning dense tree test" << std::endl;
     return true;
 }

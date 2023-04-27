@@ -359,6 +359,11 @@ pop_frame Node::search(int32_t value){
     if(!is_leaf()){
         // Search the correct child
         int32_t i = search_child_index(value);
+        if(print_flag) {
+            std::cout << "Searching " << to_string() << " for value " << value << std::endl; 
+            print_current();
+            std::cout << "Searching child " << i << " of " << to_string() << " -> " << children[i]->to_string() << std::endl;
+        }
         return children[i]->search(value);
     }
     // Check if the value is in the current node
@@ -378,7 +383,10 @@ pop_frame Node::search(int32_t value){
 std::vector<pop_frame> Node::get_range(int32_t end){
     assert(is_leaf()); // Range search is only supported in leaf nodes
     std::vector<pop_frame> results;
-    // print();
+    if(print_flag){
+        std::cout << "Range search " << to_string() << " for value " << end << std::endl; 
+        print_current();
+    }
     // The range is in the current node
     int32_t i = 0;
     for(; i < values.size(); i++){
@@ -400,6 +408,10 @@ std::vector<pop_frame> Node::get_range(int32_t end){
 
 range_search_frame Node::leaf_range_search(int32_t start, int32_t end){
     assert(is_leaf()); // Range search is only supported in leaf nodes
+    if(print_flag){
+        std::cout << "Range search " << to_string() << " for value " << start << " to " << end << std::endl; 
+        print_current();
+    }
     // The range is in the current node
     range_search_frame result_frame;
     // print();
@@ -433,6 +445,10 @@ range_search_frame Node::leaf_range_search(int32_t start, int32_t end){
 range_search_frame Node::range_search(int32_t start, int32_t end){
     // Check if the node is a branch
     if(!is_leaf()){
+        if(print_flag){
+            std::cout << "Range search " << to_string() << " for value " << start << " to " << end << std::endl; 
+            print_current();
+        }
         // Search the correct child
         int32_t i = search_child_index(start);
         return children[i]->range_search(start, end);
@@ -519,6 +535,10 @@ pop_frame Node::leaf_insert(pop_frame new_tuple){
 
 
 pop_frame Node::insert(pop_frame new_tuple){
+    if(print_flag){
+        std::cout << "Inserting " << new_tuple.value << " into " << to_string() << std::endl;
+        print_current();
+    }
     // Check if the node is a branch
     if(!is_leaf()){
         return branch_insert(new_tuple);
@@ -636,6 +656,10 @@ pop_frame Node::leaf_remove(int32_t value){
 }
 
 pop_frame Node::remove(int32_t value){
+    if(print_flag){
+        std::cout << "Removing " << value << " from " << to_string() << std::endl;
+        print_current();
+    }
     // Check if the node is a branch
     if(!is_leaf()){
         return branch_remove(value);

@@ -21,7 +21,7 @@ int VMem::get_max_blocks() {
 
 void VMem::insert_block(std::string key, block b) {
     if (data.size() >= max_blocks && !block_exists(key)) {
-        std::cout << "VMem is full" << std::endl;
+        std::cout << "VMem is full " << data.size() << " " << max_blocks << std::endl;
         print();
         std::cout << "Inserting " << key << std::endl;
         b.print();
@@ -32,7 +32,10 @@ void VMem::insert_block(std::string key, block b) {
 }
 
 bool VMem::delete_block(std::string key) {
-    return data.erase(key) > 0;
+    // std::cout << "VMem Deleting " << key << std::endl;
+    auto result = data.erase(key) > 0;
+    // std::cout << result  << data.size() << std::endl;
+    return result;
 }
 
 block VMem::get_block(std::string key) {
